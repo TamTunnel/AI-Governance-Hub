@@ -7,11 +7,9 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml poetry.lock* ./
-
-RUN pip install poetry && \
-    poetry config virtualenvs.create false && \
-    poetry install --no-root --no-dev
+# Install Python dependencies directly with pip
+RUN pip install fastapi uvicorn sqlmodel psycopg2-binary alembic pydantic python-multipart \
+    python-jose passlib reportlab
 
 COPY . .
 

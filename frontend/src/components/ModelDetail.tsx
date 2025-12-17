@@ -15,19 +15,29 @@ export function ModelDetail() {
     const [newVersionTag, setNewVersionTag] = useState('');
     const [s3Path, setS3Path] = useState('');
 
-    useEffect(() => {
-        if (id) loadVersions();
-    }, [id]);
-
-    const loadVersions = async () => {
+    const fetchVersions = async () => {
         if (!id) return;
         try {
             const data = await getModelVersions(parseInt(id));
             setVersions(data);
-        } catch (error) {
-            console.error("Failed to load versions", error);
+        } catch {
+            console.error("Failed to load versions");
         }
     };
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            if (!id) return;
+            try {
+                const data = await getModelVersions(parseInt(id));
+                if (!cancelled) setVersions(data);
+            } catch {
+                console.error("Failed to load versions");
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [id]);
 
     const handleAddVersion = async () => {
         if (!id) return;
@@ -40,8 +50,8 @@ export function ModelDetail() {
             close();
             setNewVersionTag('');
             setS3Path('');
-            loadVersions();
-        } catch (error) {
+            fetchVersions();
+        } catch {
             alert('Failed to add version');
         }
     };

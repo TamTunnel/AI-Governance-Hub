@@ -27,6 +27,6 @@ export interface ComplianceLog {
     entity_type: string;
     entity_id: string;
     action: string;
-    details?: any;
+    details?: Record<string, unknown>;
     timestamp: string;
 }

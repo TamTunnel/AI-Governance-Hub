@@ -9,17 +9,17 @@ export function ModelList() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        loadModels();
+        let cancelled = false;
+        (async () => {
+            try {
+                const data = await getModels();
+                if (!cancelled) setModels(data);
+            } catch {
+                console.error("Failed to load models");
+            }
+        })();
+        return () => { cancelled = true; };
     }, []);
-
-    const loadModels = async () => {
-        try {
-            const data = await getModels();
-            setModels(data);
-        } catch (error) {
-            console.error("Failed to load models", error);
-        }
-    };
 
     const rows = models.map((model) => (
         <tr key={model.id} onClick={() => navigate(`/models/${model.id}`)} style={{ cursor: 'pointer' }}>
