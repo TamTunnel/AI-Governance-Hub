@@ -5,20 +5,9 @@
 
 ## What Is This?
 
-A **centralized platform** for managing your organization's AI models—a registry that tracks every AI system, its versions, performance metrics, risk profiles, and a complete audit trail for EU AI Act compliance.
+A **centralized platform** for managing your organization's AI models—supporting both **EU AI Act** and **US AI governance** (NIST AI RMF) requirements.
 
-**v0.3** adds: **Policy Engine** with enforcement, **Multi-tenancy** with org/environment scoping, and **Prometheus-compatible metrics** for enterprise observability.
-
----
-
-## Who Is This For?
-
-| Role | Value |
-|------|-------|
-| **ML Engineers** | Register models, track versions, store evaluation metrics via CI/CD |
-| **Compliance Officers** | Define policies, approve models, generate PDF reports |
-| **CTOs/CISOs** | Dashboard overview, policy enforcement, observability metrics |
-| **Auditors** | Read-only access to models, audit logs, policy violations |
+**v0.4** adds: **Data Classification**, **Lineage Tracking**, **Human-in-the-Loop Approvals**, and **NIST AI RMF alignment**.
 
 ---
 
@@ -26,123 +15,144 @@ A **centralized platform** for managing your organization's AI models—a regist
 
 | Feature | Description |
 |---------|-------------|
-| **Model Registry** | Register AI models with name, owner, risk profile |
-| **Risk Profiles** | EU AI Act levels (minimal, limited, high, unacceptable) |
-| **Compliance Lifecycle** | Status: draft → under_review → approved → retired |
-| **Policy Engine** | Define and enforce governance rules automatically |
-| **Policy Violations** | Track blocked actions with full audit trail |
-| **Multi-Tenancy** | Organization + environment (dev/test/prod) scoping |
-| **Prometheus Metrics** | `/api/v1/metrics` endpoint for observability |
-| **PDF Reports** | EU AI Act style compliance documentation |
-| **RBAC** | admin, model_owner, auditor roles |
+| **Model Registry** | Central catalog of AI models |
+| **Risk Profiles** | EU AI Act & NIST AI RMF classification |
+| **Data Classification** | Sensitivity (PII/PHI/PCI) and classification levels |
+| **Lineage Tracking** | Datasets and model dependencies |
+| **Human Approval** | Capture approver, approval notes, timestamps |
+| **Policy Engine** | Define and enforce governance rules |
+| **Multi-Tenancy** | Organization + environment scoping |
+| **SSO Ready** | Designed for IdP integration |
 
 ---
 
-## Policy Engine
+## US AI Governance & NIST AI RMF Alignment
 
-### Supported Policy Types
+This platform supports alignment with the **NIST AI Risk Management Framework (AI RMF)**.
 
-| Policy | Description |
-|--------|-------------|
-| `require_evaluation_before_approval` | Models must have evaluation metrics before approval |
-| `block_high_risk_without_approval` | High-risk models cannot skip `under_review` status |
-| `require_review_for_high_risk` | High-risk models require explicit review |
+### NIST AI RMF Function Mapping
 
-### How It Works
+| NIST Function | Platform Capability |
+|---------------|---------------------|
+| **GOVERN** | RBAC, policies, organization scoping, audit logs |
+| **MAP** | Model registry, risk profiles, data classification, lineage |
+| **MEASURE** | Evaluation metrics, version tracking, performance history |
+| **MANAGE** | Compliance lifecycle, policy enforcement, human approvals |
 
-1. **Define a policy** via API or UI (`/policies`)
-2. **Policy engine evaluates** on compliance status changes
-3. **Violations are blocked** with clear error messages
-4. **PolicyViolation record** created with full details
-5. **Audit log entry** captures the blocked action
+### Sectoral Applicability
 
-### Example: Create a Policy
+| Regulation | Relevant Features |
+|------------|-------------------|
+| **HIPAA** | `data_sensitivity: phi`, audit logging |
+| **GLBA/FFIEC** | Risk profiles, data classification, approval workflows |
+| **CCPA/CPRA** | PII tracking, data sources documentation |
+| **FedRAMP** | Organization scoping, audit trails, security controls |
+
+---
+
+## Data Classification & Sensitivity
+
+### Sensitivity Levels
+
+| Level | Description | Example Use Case |
+|-------|-------------|------------------|
+| `public` | Non-sensitive data | Public datasets |
+| `internal` | Internal business data | Operational metrics |
+| `pii` | Personally Identifiable Information | Customer names, emails |
+| `phi` | Protected Health Information (HIPAA) | Medical records |
+| `pci` | Payment Card Industry data | Credit card numbers |
+
+### Classification Levels
+
+| Level | Description |
+|-------|-------------|
+| `public` | Open to external parties |
+| `internal` | Internal use only |
+| `confidential` | Restricted access |
+| `restricted` | Highly restricted (need-to-know) |
+
+### Jurisdiction
+
+Track data residency requirements with the `jurisdiction` field (e.g., "US", "EU", "Global").
+
+---
+
+## Lineage & Traceability
+
+### Why Lineage Matters
+
+- **Audit compliance**: Know exactly what data trained your models
+- **Incident response**: Quickly identify affected models when data issues arise
+- **Reproducibility**: Track model dependencies for retraining
+
+### Data Model
+
+```
+Dataset (training data, validation data, etc.)
+    ↓ linked via ModelDatasetLink
+ModelRegistry (your AI model)
+    ↓ linked via ModelDependency
+ModelRegistry (parent models, fine-tuning sources)
+```
+
+### Example: Link a Dataset
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/policies/" \
+# Create a dataset
+curl -X POST "http://localhost:8000/api/v1/datasets/" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Require Evaluation Before Approval",
-    "description": "Models must have metrics before being approved",
-    "scope": "global",
-    "condition_type": "require_evaluation_before_approval",
-    "is_active": true
+    "name": "Customer Transactions Q4",
+    "source_system": "Snowflake",
+    "data_sensitivity": "pii",
+    "data_classification": "confidential"
   }'
+
+# Link to a model
+curl -X POST "http://localhost:8000/api/v1/models/1/datasets/" \
+  -H "Content-Type: application/json" \
+  -d '{"dataset_id": 1, "dataset_type": "training"}'
 ```
 
 ---
 
-## Organizations & Environments
+## Human-in-the-Loop Approvals
 
-### Conceptual Model
+When a model is approved, the system captures:
 
-```
-Organization (e.g., "Agency A", "Department B")
-  └── Environment (dev, test, staging, prod)
-       └── Models (scoped by org + env)
-```
+| Field | Description |
+|-------|-------------|
+| `approved_by_user_id` | Who approved the model |
+| `approved_at` | Timestamp of approval |
+| `approval_notes` | Required justification |
 
-### How to Use
-
-- **Models** include `organization_id` and `environment` fields
-- **API queries** can be filtered by organization/environment
-- **Users** belong to organizations (planned: multi-org access)
-
-### Enterprise Mapping
-
-| Enterprise Concept | Platform Feature |
-|-------------------|------------------|
-| Department/Agency | Organization |
-| SDLC Stage | Environment (dev/test/prod) |
-| Data Classification | Risk Level |
+**Approval notes are mandatory** when changing status to `approved`.
 
 ---
 
-## Observability
+## SSO / Identity Provider Integration (Planned)
 
-### Prometheus Metrics
+### Recommended Patterns
 
-Access metrics at: `GET /api/v1/metrics`
+1. **Reverse proxy + headers**: Deploy behind Nginx/Envoy with IdP, pass user info via headers
+2. **App-native OIDC**: Integrate directly with Okta, Azure AD, or Keycloak
 
-```prometheus
-# HELP ai_governance_models_total Total number of registered AI models
-ai_governance_models_total 42
+### IdP Role Mapping
 
-# HELP ai_governance_violations_total Total policy violations
-ai_governance_violations_total 3
-
-# Models by risk level
-ai_governance_models_by_risk{risk_level="high"} 5
-ai_governance_models_by_risk{risk_level="minimal"} 20
-```
-
-### Grafana Integration
-
-1. Add Prometheus data source pointing to your Prometheus server
-2. Create dashboard with key metrics:
-   - Model counts by risk level
-   - Policy violations over time
-   - Compliance status distribution
+| IdP Group | Maps to Role |
+|-----------|--------------|
+| `ai-admins` | `admin` |
+| `ml-engineers` | `model_owner` |
+| `compliance-team` | `auditor` |
 
 ---
 
-## Security & Deployment Considerations
+## Security & Deployment
 
 ### Network Placement
 
 > [!IMPORTANT]
-> This application should be deployed **behind a reverse proxy** (Nginx, Envoy, API Gateway) and not directly exposed to the internet.
-
-**Recommended topology:**
-```
-Internet → Load Balancer → Nginx/Envoy (TLS) → AI Governance Hub → PostgreSQL
-```
-
-### TLS/HTTPS
-
-- Configure TLS termination at the reverse proxy
-- Use Let's Encrypt or organizational certificates
-- Enforce HTTPS redirects
+> Deploy behind a reverse proxy with TLS termination.
 
 ### Secrets Management
 
@@ -150,48 +160,11 @@ Internet → Load Balancer → Nginx/Envoy (TLS) → AI Governance Hub → Postg
 |--------|--------|
 | `DATABASE_URL` | Environment variable |
 | `SECRET_KEY` | Environment variable (min 32 chars) |
-| `POSTGRES_PASSWORD` | Environment variable or secrets manager |
 
-> [!CAUTION]
-> Never commit secrets to version control. Use `.env` files for local development only.
+### Observability
 
-### Rate Limiting
-
-Rate limiting should be configured at the reverse proxy level:
-
-```nginx
-# Example Nginx rate limiting
-limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
-location /api/ {
-    limit_req zone=api burst=20 nodelay;
-}
-```
-
-### Logging & SIEM Integration
-
-- All governance actions are logged to `ComplianceLog` table
-- Logs include: entity, action, user, timestamp, details (JSON)
-- Export logs to SIEM via database replication or API polling
-
----
-
-## Backup & Data Export
-
-### PostgreSQL Backup
-
-```bash
-# Full backup
-pg_dump -h localhost -U postgres ai_governance > backup.sql
-
-# Restore
-psql -h localhost -U postgres ai_governance < backup.sql
-```
-
-### API Export
-
-- `GET /api/v1/models/` - Export all models
-- `GET /api/v1/audit-logs/` - Export audit trail
-- `GET /api/v1/policies/violations/` - Export policy violations
+- Prometheus metrics: `GET /api/v1/metrics`
+- Structured audit logs in `ComplianceLog` table
 
 ---
 
@@ -207,8 +180,6 @@ docker compose up --build
 | Service | URL |
 |---------|-----|
 | Frontend | http://localhost:3000 |
-| Dashboard | http://localhost:3000/dashboard |
-| Policies | http://localhost:3000/policies |
 | API Docs | http://localhost:8000/docs |
 | Metrics | http://localhost:8000/api/v1/metrics |
 
@@ -218,13 +189,15 @@ docker compose up --build
 
 | Status | Feature |
 |--------|---------|
-| ✅ Done | Policy Engine with enforcement |
-| ✅ Done | Organization + environment scoping |
-| ✅ Done | Prometheus metrics endpoint |
-| 🔜 Planned | SSO/SAML integration |
-| 🔜 Planned | Webhooks for status changes |
-| 🔜 Planned | MLflow integration |
-| 🔜 Planned | Kubernetes operator |
+| ✅ Done | Policy Engine |
+| ✅ Done | Multi-tenancy |
+| ✅ Done | Data Classification (v0.4) |
+| ✅ Done | Lineage Tracking (v0.4) |
+| ✅ Done | Human Approvals (v0.4) |
+| 🔜 | SSO/OIDC integration |
+| 🔜 | MLflow integration |
+| 🔜 | Advanced policy DSL |
+| 🔜 | Model lineage visualization |
 
 ---
 
@@ -232,18 +205,14 @@ docker compose up --build
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | React, TypeScript, Vite, Mantine UI |
-| Backend | Python 3.11, FastAPI, SQLModel, Pydantic |
+| Frontend | React, TypeScript, Mantine |
+| Backend | Python 3.11, FastAPI, SQLModel |
 | Database | PostgreSQL 15 |
-| Auth | OAuth2, JWT, bcrypt, RBAC |
-| Observability | Prometheus-compatible metrics |
-| Infrastructure | Docker, Docker Compose, Nginx |
-| CI/CD | GitHub Actions |
+| Auth | OAuth2, JWT, RBAC |
+| Infrastructure | Docker, Nginx |
 
 ---
 
 ## License
 
-Licensed under **Apache License 2.0** — enterprise-friendly, permits commercial use.
-
-See [LICENSE](LICENSE) for details.
+Apache License 2.0 — See [LICENSE](LICENSE).

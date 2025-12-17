@@ -3,6 +3,10 @@ export type ComplianceStatus = 'draft' | 'under_review' | 'approved' | 'retired'
 export type PolicyScope = 'global' | 'organization' | 'environment';
 export type PolicyConditionType = 'require_evaluation_before_approval' | 'block_high_risk_without_approval' | 'require_review_for_high_risk';
 export type Environment = 'dev' | 'test' | 'staging' | 'prod';
+export type DataSensitivity = 'public' | 'internal' | 'pii' | 'phi' | 'pci';
+export type DataClassification = 'public' | 'internal' | 'confidential' | 'restricted';
+export type DatasetType = 'training' | 'validation' | 'test' | 'inference';
+export type DependencyType = 'fine_tuned_from' | 'ensemble_component_of' | 'distilled_from' | 'derived_from';
 
 export interface ModelRegistry {
     id: number;
@@ -19,6 +23,15 @@ export interface ModelRegistry {
     oversight_plan?: string;
     organization_id?: number;
     environment?: Environment;
+    // US Governance fields
+    data_sensitivity: DataSensitivity;
+    data_classification: DataClassification;
+    jurisdiction: string;
+    sector?: string;
+    // Approval metadata
+    approved_by_user_id?: number;
+    approved_at?: string;
+    approval_notes?: string;
 }
 
 export interface ModelVersion {
@@ -83,5 +96,40 @@ export interface Organization {
     is_active: boolean;
     created_at: string;
 }
+
+export interface Dataset {
+    id: number;
+    name: string;
+    description?: string;
+    source_system?: string;
+    location?: string;
+    data_sensitivity: DataSensitivity;
+    data_classification: DataClassification;
+    organization_id?: number;
+    record_count?: number;
+    created_at: string;
+}
+
+export interface ModelDatasetLink {
+    id: number;
+    model_id: number;
+    model_version_id?: number;
+    dataset_id: number;
+    dataset_type: DatasetType;
+    notes?: string;
+    created_at: string;
+}
+
+export interface ModelDependency {
+    id: number;
+    parent_model_id: number;
+    parent_version_id?: number;
+    child_model_id: number;
+    child_version_id?: number;
+    dependency_type: DependencyType;
+    notes?: string;
+    created_at: string;
+}
+
 
 

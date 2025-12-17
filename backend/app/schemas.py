@@ -25,6 +25,23 @@ class ComplianceStatus(str, Enum):
     retired = "retired"
 
 
+class DataSensitivity(str, Enum):
+    """Data sensitivity levels for US governance"""
+    public = "public"
+    internal = "internal"
+    pii = "pii"
+    phi = "phi"
+    pci = "pci"
+
+
+class DataClassification(str, Enum):
+    """Data classification levels for enterprise governance"""
+    public = "public"
+    internal = "internal"
+    confidential = "confidential"
+    restricted = "restricted"
+
+
 # --- Model Registry Schemas ---
 class ModelCreate(BaseModel):
     """Schema for creating a new model"""
@@ -36,6 +53,11 @@ class ModelCreate(BaseModel):
     domain: Optional[str] = Field(None, max_length=100)
     potential_harm: Optional[str] = Field(None, max_length=2000)
     intended_purpose: Optional[str] = Field(None, max_length=2000)
+    # US Governance fields
+    data_sensitivity: Optional[DataSensitivity] = DataSensitivity.internal
+    data_classification: Optional[DataClassification] = DataClassification.internal
+    jurisdiction: Optional[str] = Field("US", max_length=50)
+    sector: Optional[str] = Field(None, max_length=100)
 
 
 class ModelRead(BaseModel):
@@ -52,6 +74,15 @@ class ModelRead(BaseModel):
     intended_purpose: Optional[str]
     data_sources: Optional[str]
     oversight_plan: Optional[str]
+    # US Governance fields
+    data_sensitivity: DataSensitivity
+    data_classification: DataClassification
+    jurisdiction: str
+    sector: Optional[str]
+    # Approval metadata
+    approved_by_user_id: Optional[int]
+    approved_at: Optional[datetime]
+    approval_notes: Optional[str]
 
     class Config:
         from_attributes = True
@@ -78,6 +109,7 @@ class ComplianceStatusUpdate(BaseModel):
     """Schema for updating compliance status"""
     status: ComplianceStatus
     reason: Optional[str] = Field(None, max_length=500, description="Reason for status change")
+    approval_notes: Optional[str] = Field(None, max_length=2000, description="Required for approval")
 
 
 # --- Model Version Schemas ---

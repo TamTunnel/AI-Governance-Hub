@@ -8,6 +8,7 @@ from .api import report_routes
 from .api import policy_routes
 from .api import organization_routes
 from .api import metrics_routes
+from .api import lineage_routes
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -16,8 +17,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="AI Governance Hub API",
-    description="API for AI Model Governance & Compliance - v0.3 with Policy Engine",
-    version="0.3.0",
+    description="API for AI Model Governance & Compliance - v0.4 with US Governance & Lineage",
+    version="0.4.0",
     lifespan=lifespan
 )
 
@@ -47,9 +48,13 @@ app.include_router(organization_routes.router, prefix="/api/v1")
 # Metrics routes (Prometheus-compatible)
 app.include_router(metrics_routes.router, prefix="/api/v1")
 
+# Lineage routes (datasets & dependencies)
+app.include_router(lineage_routes.router, prefix="/api/v1")
+
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to AI Governance Hub API v0.3"}
+    return {"message": "Welcome to AI Governance Hub API v0.4"}
+
 
 
 

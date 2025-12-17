@@ -23,21 +23,38 @@ class ComplianceStatus(str, Enum):
     retired = "retired"
 
 
+class DataSensitivity(str, Enum):
+    """Data sensitivity levels for US governance (HIPAA, PCI, etc.)"""
+    public = "public"
+    internal = "internal"
+    pii = "pii"  # Personally Identifiable Information
+    phi = "phi"  # Protected Health Information (HIPAA)
+    pci = "pci"  # Payment Card Industry data
+
+
+class DataClassification(str, Enum):
+    """Data classification levels for enterprise governance"""
+    public = "public"
+    internal = "internal"
+    confidential = "confidential"
+    restricted = "restricted"
+
+
 class ModelRegistry(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    name: str = Field(index=True)  # Removed unique constraint for multi-org
+    name: str = Field(index=True)
     description: Optional[str] = None
     owner: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
     # Multi-tenancy fields
     organization_id: Optional[int] = Field(default=None, foreign_key="organization.id")
-    environment: str = Field(default="dev")  # dev, test, staging, prod
+    environment: str = Field(default="dev")
     
     # Risk Profile fields
     risk_level: RiskLevel = Field(default=RiskLevel.unclassified)
-    domain: Optional[str] = None  # e.g., "healthcare", "finance", "hr"
-    potential_harm: Optional[str] = None  # Description of potential harms
+    domain: Optional[str] = None
+    potential_harm: Optional[str] = None
     
     # Compliance lifecycle
     compliance_status: ComplianceStatus = Field(default=ComplianceStatus.draft)
@@ -46,6 +63,17 @@ class ModelRegistry(SQLModel, table=True):
     intended_purpose: Optional[str] = None
     data_sources: Optional[str] = None
     oversight_plan: Optional[str] = None
+    
+    # US Governance / Data Classification fields
+    data_sensitivity: DataSensitivity = Field(default=DataSensitivity.internal)
+    data_classification: DataClassification = Field(default=DataClassification.internal)
+    jurisdiction: str = Field(default="US")  # US, EU, Global, etc.
+    sector: Optional[str] = None  # healthcare, finance, public_sector, etc.
+    
+    # Human-in-the-loop approval metadata
+    approved_by_user_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    approved_at: Optional[datetime] = None
+    approval_notes: Optional[str] = None
     
     versions: List["ModelVersion"] = Relationship(back_populates="model")
 
@@ -78,4 +106,5 @@ class ComplianceLog(SQLModel, table=True):
     action: str
     details: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+
 

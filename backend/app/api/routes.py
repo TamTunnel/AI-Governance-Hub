@@ -153,10 +153,18 @@ def update_compliance_status(
     the action is blocked and a PolicyViolation record is created.
     """
     from ..core.policy_engine import enforce_compliance_status_change
+    from datetime import datetime
     
     model = session.get(ModelRegistry, model_id)
     if not model:
         raise HTTPException(status_code=404, detail="Model not found")
+    
+    # Require approval notes when approving
+    if payload.status == ComplianceStatus.approved and not payload.approval_notes:
+        raise HTTPException(
+            status_code=400,
+            detail="Approval notes are required when approving a model"
+        )
     
     # Enforce policies before allowing status change
     enforcement_result = enforce_compliance_status_change(
@@ -175,6 +183,12 @@ def update_compliance_status(
     old_status = model.compliance_status
     model.compliance_status = payload.status
     
+    # Capture approval metadata when status changes to approved
+    if payload.status == ComplianceStatus.approved:
+        model.approved_at = datetime.utcnow()
+        model.approval_notes = payload.approval_notes
+        # approved_by_user_id would be set from auth context
+    
     session.add(model)
     session.commit()
     session.refresh(model)
@@ -187,7 +201,8 @@ def update_compliance_status(
         details={
             "from": old_status.value,
             "to": payload.status.value,
-            "reason": payload.reason
+            "reason": payload.reason,
+            "approval_notes": payload.approval_notes if payload.status == ComplianceStatus.approved else None
         }
     )
     session.add(log)
