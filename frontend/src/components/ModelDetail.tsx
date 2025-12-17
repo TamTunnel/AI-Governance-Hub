@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Title, Text, Card, Group, Badge, Button, Table, Modal, TextInput } from '@mantine/core';
+import { Container, Title, Card, Group, Badge, Button, Table, Modal, TextInput } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { ModelRegistry, ModelVersion, getModelVersions, createVersion, getAuditLogs, ComplianceLog } from '../api';
+import { getModelVersions, createVersion } from '../api';
+import type { ModelVersion } from '../types';
 
 export function ModelDetail() {
     const { id } = useParams();

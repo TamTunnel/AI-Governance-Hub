@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ModelRegistry, ModelVersion, EvaluationMetric, ComplianceLog } from './types';
+import type { ModelRegistry, ModelVersion, EvaluationMetric, ComplianceLog } from './types';
 
 const api = axios.create({
     baseURL: 'http://localhost:8000/api/v1',
