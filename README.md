@@ -149,6 +149,9 @@ When a model is approved, the system captures:
 While concise and powerful, this platform has specific boundaries:
 
 *   **Not Legal Advice:** Using this tool does not guarantee compliance with laws. It provides the *record-keeping* to support compliance.
+*   **Evaluation & Testing:** The hub does not run advanced technical evaluations (bias, robustness, red-teaming) itself. It stores and surfaces results produced by your external ML pipelines and tools.
+*   **Discovery & Inventory:** The hub does not automatically scan your network to discover "Shadow AI" systems. It governs models that are registered into it, relying on organizational policy and CI/CD integration to be comprehensive.
+*   **Certification Status:** The hub provides documentation support but does not grant formal certification (e.g., FedRAMP authorization, ISO/IEC 42001, or official EU AI Act conformity). It is a tool for internal control and audit readiness, not a substitute for external accreditation.
 *   **Not a GRC Platform:** It is not designed to manage broader enterprise risks (cybersecurity, physical, financial) outside of AI.
 *   **Not an Observability Solution:** It tracks *metadata* and *metrics*, but does not replace real-time monitoring tools like Datadog, Prometheus, or Grafana for live inference capability.
 *   **Not a Human Replacement:** The tool facilitates governance but does not replace the need for human review boards or legal counsel.
