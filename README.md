@@ -5,8 +5,9 @@
 
 ## What Is This?
 
-A **centralized platform** for managing your organization's AI models—supporting both **EU AI Act** and **US AI governance** (NIST AI RMF) requirements.
+A **centralized platform** for managing your organization's AI models—supporting both **EU AI Act** and **US AI governance** (NIST AI RMF) requirements. Essentially it is a Open‑source control center for AI model inventory, risk, and compliance across your organization.
 
+- **Simple Analogy:** Think of AI‑Governance‑Hub as an air‑traffic control tower and logbook for your AI models. Instead of planes, you track every model: where it lives, what data it uses, how risky it is, and whether it is cleared to “take off” into production—backed by policies and audit trails that executives, auditors, and regulators can actually understand.
 ---
 
 ## Executive Summary: The Problem & How This Helps
