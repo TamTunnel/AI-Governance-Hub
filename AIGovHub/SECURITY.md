@@ -8,21 +8,22 @@ If you discover a security vulnerability in AI Governance Hub, please verify it 
 
 **security@example.com** (Replace with actual security email if available, otherwise suggest private vulnerability reporting via GitHub)
 
-*   We will acknowledge your report within 48 hours.
-*   We will provide a timeline for a fix.
-*   Please do not disclose the vulnerability publicly until a fix is released.
+- We will acknowledge your report within 48 hours.
+- We will provide a timeline for a fix.
+- Please do not disclose the vulnerability publicly until a fix is released.
 
 ## 🔒 Supported Versions
 
 | Version | Supported |
-| :--- | :--- |
-| 0.4.x | ✅ Yes |
-| 0.3.x | ❌ No |
-| < 0.3 | ❌ No |
+| :------ | :-------- |
+| 0.4.x   | ✅ Yes    |
+| 0.3.x   | ❌ No     |
+| < 0.3   | ❌ No     |
 
 ## 🔐 Deployment Security
 
 For production deployments in government or enterprise:
+
 1.  **Always** deploy behind a TLS-terminating reverse proxy (Nginx).
 2.  **Enable** the RBAC policies suitable for your organization.
 3.  **Rotate** `SECRET_KEY` and Database Credentials regularly.

@@ -1,12 +1,12 @@
-import { MantineProvider } from '@mantine/core';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import '@mantine/core/styles.css';
-import { ModelList } from './components/ModelList';
-import { ModelForm } from './components/ModelForm';
-import { ModelDetail } from './components/ModelDetail';
-import { ComplianceDashboard } from './components/ComplianceDashboard';
-import { PolicyList } from './components/PolicyList';
-import { PolicyViolations } from './components/PolicyViolations';
+import { MantineProvider } from "@mantine/core";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "@mantine/core/styles.css";
+import { ModelList } from "./components/ModelList";
+import { ModelForm } from "./components/ModelForm";
+import { ModelDetail } from "./components/ModelDetail";
+import { ComplianceDashboard } from "./components/ComplianceDashboard";
+import { PolicyList } from "./components/PolicyList";
+import { PolicyViolations } from "./components/PolicyViolations";
 
 function App() {
   return (
@@ -26,5 +26,3 @@ function App() {
 }
 
 export default App;
-
-
