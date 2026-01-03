@@ -230,6 +230,19 @@ docker compose up --build
 | API Docs | http://localhost:8000/docs           |
 | Metrics  | http://localhost:8000/api/v1/metrics |
 
+### Run a Demo Scenario
+
+We include a python script that walks through a full governance workflow (Register -> Link Lineage -> Enforce Policy).
+
+1. Ensure the stack is running (`docker compose up`)
+2. Run the script:
+
+```bash
+cd AIGovHub
+pip install httpx
+python examples/demo_flow.py
+```
+
 ---
 
 ## Technology Stack
